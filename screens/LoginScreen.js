@@ -10,20 +10,16 @@ const Logo = ({ source, style }) => (
 );
 
 export default function LoginScreen() {
-  const navigation = useNavigation(); // ใช้ navigation hook
-
-  // สร้าง state เพื่อเก็บข้อมูล email และ password
+  const navigation = useNavigation(); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // ตรวจสอบ email และ password ว่าถูกต้องหรือไม่
-    if (email === 'phatch@gmail.com' && password === '123456789') {
-      // ถ้า email และ password ถูกต้อง ให้ไปที่หน้า HomeScreen
+    if (email.trim() !== '' && password.trim() !== '') {
       navigation.navigate('Home');
+      navigation.navigate('Profile', { userName, email });
     } else {
-      // ถ้าไม่ถูกต้อง ให้แสดงข้อความแจ้งเตือน
-      Alert.alert('Error', 'Invalid email or password');
+      Alert.alert('Error', 'Please enter your email and password');
     }
   };
 
@@ -31,25 +27,20 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-      {/* Background Image */}
       <Image 
-  style={styles.backgroundImage} 
-  source={require('../assets/images/background.png')} 
-/>
+        style={styles.backgroundImage} 
+        source={require('../assets/images/background.png')} 
+      />
 
-<Logo 
-  source={require('../assets/images/lustres.png')} 
-  style={styles.logoLarge}
-/>
-
-      {/* Title and Form */}
+      <Logo 
+        source={require('../assets/images/lustres.png')} 
+        style={styles.logoLarge}
+      />
       <View style={styles.formContainer}>
-        {/* Title */}
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Login</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <TextInput 
@@ -57,7 +48,7 @@ export default function LoginScreen() {
               placeholderTextColor={'gray'} 
               style={styles.input} 
               value={email}
-              onChangeText={setEmail}  // เก็บค่า email
+              onChangeText={setEmail} 
             />
           </View>
 
@@ -68,22 +59,18 @@ export default function LoginScreen() {
               secureTextEntry={true} 
               style={styles.input} 
               value={password}
-              onChangeText={setPassword}  // เก็บค่า password
+              onChangeText={setPassword}  
             />
           </View>
-
-          {/* Login Button */}
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
-
-          {/* Sign Up Link */}
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>
               Don't have an account?{' '}
               <Text 
                 style={styles.signupLink} 
-                onPress={() => navigation.navigate('SignUp')}  // ลิ้งไปยังหน้า SignUp
+                onPress={() => navigation.navigate('SignUp')}  
               >
                 Sign Up
               </Text>

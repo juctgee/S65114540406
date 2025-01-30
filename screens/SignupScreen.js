@@ -1,69 +1,117 @@
-import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  View,
+  Image,
+  StyleSheet,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 
+// Logo Component
 const Logo = ({ source, style }) => (
   <View style={styles.logoContainer}>
     <Image source={source} style={style} />
   </View>
 );
 
+// SignUpScreen Component
 export default function SignUpScreen() {
-  const navigation = useNavigation(); // Use navigation hook
+  const navigation = useNavigation();
+
+  // States for form data
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Handle sign up
+  const handleSignUp = async () => {
+    if (!username || !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://192.168.1.47:8081/api/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'User registered successfully');
+        navigation.navigate('Login'); // ไปหน้า Login
+      } else {
+        Alert.alert('Error', data.error || 'Failed to register');
+      }
+    } catch (err) {
+      Alert.alert('Error', `Network request failed: ${err.message}`);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Background Image */}
-      <Image 
-        style={styles.backgroundImage} 
-        source={require('C:/Users/66923/Documents/Money/Money/assets/images/background.png')} 
+      <Image
+        style={styles.backgroundImage}
+        source={require('C:/Users/66923/Documents/Project/Money/Money/Money/assets/images/background.png')}
       />
 
       {/* Logo */}
-      <Logo 
-        source={require('C:/Users/66923/Documents/Money/Money/assets/images/lustres.png')} 
+      <Logo
+        source={require('C:/Users/66923/Documents/Project/Money/Money/Money/assets/images/lustres.png')}
         style={styles.logoLarge}
       />
 
       {/* Title and Form */}
       <View style={styles.formContainer}>
-        {/* Title */}
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Sign Up</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <TextInput 
-              placeholder='Username' 
-              placeholderTextColor={'gray'} 
-              style={styles.input} 
+            <TextInput
+              placeholder="Username"
+              placeholderTextColor="gray"
+              style={styles.input}
+              value={username}
+              onChangeText={setUsername}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <TextInput 
-              placeholder='Email' 
-              placeholderTextColor={'gray'} 
-              style={styles.input} 
+            <TextInput
+              placeholder="Email"
+              placeholderTextColor="gray"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <TextInput 
-              placeholder='Password' 
-              placeholderTextColor={'gray'} 
-              secureTextEntry={true} 
-              style={styles.input} 
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor="gray"
+              secureTextEntry
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
 
           {/* Sign Up Button */}
-          <TouchableOpacity style={styles.signUpButton} onPress={() => {}}>
+          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
             <Text style={styles.signUpButtonText}>Sign Up</Text>
           </TouchableOpacity>
 
@@ -71,9 +119,9 @@ export default function SignUpScreen() {
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>
               Already have an account?{' '}
-              <Text 
-                style={styles.loginLink} 
-                onPress={() => navigation.navigate('Login') /* Navigate to Login */}
+              <Text
+                style={styles.loginLink}
+                onPress={() => navigation.navigate('Login')}
               >
                 Login
               </Text>
@@ -85,6 +133,7 @@ export default function SignUpScreen() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
