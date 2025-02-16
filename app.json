@@ -4,24 +4,25 @@
     "slug": "Money",
     "version": "1.0.0",
     "orientation": "portrait",
-  
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "C:/Users/66923/Documents/Money/Money/assets/images/splash.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "newArchEnabled": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "C:/Users/66923/Documents/Money/Money/assets/images/icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "newArchEnabled": true,
+      "package": "com.anonymous.Money"
     },
     "web": {
-      "favicon": "C:/Users/66923/Documents/Money/Money/assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png"
     }
   }
 }

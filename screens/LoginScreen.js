@@ -16,9 +16,15 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (email.trim() !== '' && password.trim() !== '') {
+      // นำทางไปที่หน้า Home ก่อน
       navigation.navigate('Home');
-      navigation.navigate('Profile', { userName, email });
-    } else {
+      
+      // ส่งค่าผ่าน navigation ไปยังหน้า Profile
+      //navigation.navigate('Profile', {
+       // userName: 'User Name',  // คุณสามารถกำหนด userName จาก input หรือข้อมูลที่ต้องการ
+       // email: email,
+     // });
+    //} else {
       Alert.alert('Error', 'Please enter your email and password');
     }
   };

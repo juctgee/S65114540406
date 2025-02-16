@@ -1,10 +1,11 @@
-// ProfileScreen.js
+// ProfileScreen component
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 export default function ProfileScreen({ route, navigation }) {
-  const { userName, email } = route.params || {};  // Safely extract user data from route.params
+  // ตรวจสอบและกำหนดค่าเริ่มต้นหาก route.params ไม่มีค่า
+  const { userName = 'ee', email = 'ee@gmail.com ' } = route.params || {};
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -21,22 +22,19 @@ export default function ProfileScreen({ route, navigation }) {
     setModalVisible(false);
   };
 
-  if (!userName || !email) {
-    return <Text>Loading...</Text>;  // Or display a placeholder if user data is unavailable
-  }
-
   return (
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileContainer}>
         <Image source={require('../assets/images/cat.png')} style={styles.avatar} />
+        <View style={styles.profileDetails}>
+          <Text style={styles.profileName}>{userName}</Text>
+          <Text style={styles.profileEmail}>{email}</Text>
+        </View>
         <TouchableOpacity style={styles.editButton}>
           <FontAwesome5 name="pen" size={16} color="gray" />
         </TouchableOpacity>
       </View>
-
-      <Text style={styles.profileName}>{userName}</Text>
-      <Text style={styles.profileEmail}>{email}</Text>
 
       {/* Account Section */}
       <TouchableOpacity style={styles.menuItem}>

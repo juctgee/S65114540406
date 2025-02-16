@@ -1,14 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';  // for icons
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'; // Import navigation
+
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 const BudgetScreen = () => {
+  const navigation = useNavigation(); // ใช้งาน navigation
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(new Date().getMonth());
+
+  const handlePrevMonth = () => {
+    setCurrentMonthIndex(prevIndex => (prevIndex === 0 ? 11 : prevIndex - 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonthIndex(prevIndex => (prevIndex === 11 ? 0 : prevIndex + 1));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="chevron-back" size={24} color="white" />
-        <Text style={styles.monthText}>May</Text>
-        <Ionicons name="chevron-forward" size={24} color="white" />
+        <TouchableOpacity onPress={handlePrevMonth}>
+          <Ionicons name="chevron-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.monthText}>{months[currentMonthIndex]}</Text>
+        <TouchableOpacity onPress={handleNextMonth}>
+          <Ionicons name="chevron-forward" size={24} color="white" />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.body}>
@@ -16,7 +37,8 @@ const BudgetScreen = () => {
         <Text style={styles.subText}>Let’s make one so you’re in control.</Text>
       </View>
 
-      <TouchableOpacity style={styles.createButton}>
+      {/* ปุ่มกดเพื่อไปหน้าสร้าง Budget */}
+      <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateBudgetScreen')}>
         <Text style={styles.buttonText}>Create a budget</Text>
       </TouchableOpacity>
     </View>
@@ -37,7 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6200ea',
     padding: 15,
     borderRadius: 10,
-    marginTop: 80,  // เพิ่ม marginTop เพื่อขยับลงมา
+    marginTop: 80,
   },
   monthText: {
     color: 'white',

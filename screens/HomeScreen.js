@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Modal, TextInput, Image, PermissionsAndroid } from 'react-native';
 import { LineChart } from 'react-native-svg-charts';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const { width } = Dimensions.get('window');
 
@@ -10,29 +11,68 @@ export default function HomeScreen() {
   const [selectedTab, setSelectedTab] = useState('Today');
   const [savingsData, setSavingsData] = useState({
     Today: [
-      { icon: 'graduation-cap', label: 'Education', amount: '$220', time: '10:00 AM' },
-      { icon: 'car', label: 'Buy a Car', amount: '$80', time: '03:30 PM' },
-      { icon: 'utensils', label: 'Food', amount: '$50', time: '07:30 PM' },
+      { icon: 'graduation-cap', label: 'Education', amount: 220, time: '10:00 AM' },
+      { icon: 'car', label: 'Buy a Car', amount: 80, time: '03:30 PM' },
+      { icon: 'utensils', label: 'Food', amount: 50, time: '07:30 PM' },
     ],
     Week: [
-      { icon: 'graduation-cap', label: 'Education', amount: '$300', time: '09:00 AM' },
-      { icon: 'car', label: 'Buy a Car', amount: '$150', time: '02:00 PM' },
-      { icon: 'utensils', label: 'Food', amount: '$100', time: '06:00 PM' },
+      { icon: 'graduation-cap', label: 'Education', amount: 300, time: '09:00 AM' },
+      { icon: 'car', label: 'Buy a Car', amount: 150, time: '02:00 PM' },
+      { icon: 'utensils', label: 'Food', amount: 100, time: '06:00 PM' },
+    ],
+    Month: [
+      { icon: 'graduation-cap', label: 'Education', amount: 500, time: '10:00 AM' },
+      { icon: 'car', label: 'Buy a Car', amount: 400, time: '04:00 PM' },
+      { icon: 'utensils', label: 'Food', amount: 200, time: '08:00 PM' },
+    ],
+    Year: [
+      { icon: 'graduation-cap', label: 'Education', amount: 2000, time: '10:00 AM' },
+      { icon: 'car', label: 'Buy a Car', amount: 1200, time: '01:00 PM' },
+      { icon: 'utensils', label: 'Food', amount: 800, time: '05:00 PM' },
     ],
   });
   const [showModal, setShowModal] = useState(false);
   const [newItem, setNewItem] = useState({ label: '', amount: '', time: '' });
+  const [editItemIndex, setEditItemIndex] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
+  
 
-  const data = [50, 10, 40, 95, 85, 91, 35];
+  // Get current month and year
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+  const currentYear = new Date().getFullYear();
+
+  const data = savingsData[selectedTab].map((item) => item.amount);  // Map the amounts based on selected tab
+
+  // Request permissions for Android
+  const requestPermissions = async () => {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+    );
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Gallery permission denied');
+    }
+  };
 
   const handleAddItem = () => {
-    const updatedSavings = [...savingsData[selectedTab], newItem];
-    setSavingsData({
-      ...savingsData,
-      [selectedTab]: updatedSavings,
-    });
+    if (editItemIndex !== null) {
+      const updatedSavings = [...savingsData[selectedTab]];
+      updatedSavings[editItemIndex] = newItem;
+      setSavingsData({
+        ...savingsData,
+        [selectedTab]: updatedSavings,
+      });
+      setEditItemIndex(null); // Reset edit index
+    } else {
+      const updatedSavings = [...savingsData[selectedTab], newItem];
+      setSavingsData({
+        ...savingsData,
+        [selectedTab]: updatedSavings,
+      });
+    }
+
     setShowModal(false);
     setNewItem({ label: '', amount: '', time: '' });
+    setImageUri(null);  // Reset image after adding the item
   };
 
   const handleDeleteItem = (index) => {
@@ -43,18 +83,42 @@ export default function HomeScreen() {
     });
   };
 
+  const handleEditItem = (index) => {
+    const itemToEdit = savingsData[selectedTab][index];
+    setNewItem({ label: itemToEdit.label, amount: itemToEdit.amount, time: itemToEdit.time });
+    setEditItemIndex(index);
+    setShowModal(true);
+  };
+
+  const handleSelectImage = () => {
+    requestPermissions();  // Request permissions before opening the gallery
+    launchImageLibrary(
+      { mediaType: 'photo', quality: 0.5 },
+      (response) => {
+        console.log('ImagePicker Response:', response);  // Log the response to check
+        if (response.didCancel) {
+          console.log('User canceled image picker');
+        } else if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          setImageUri(response.assets[0].uri);
+        }
+      }
+    );
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <FontAwesome5 name="user-circle" size={40} color="#FFC0CB" />
-          <Text style={styles.month}>October</Text>
+          <Text style={styles.month}>{currentMonth} {currentYear}</Text>
           <MaterialIcons name="notifications-none" size={28} color="purple" />
         </View>
 
         <View style={styles.balanceContainer}>
           <Text style={styles.balanceTitle}>Account Balance</Text>
-          <Text style={styles.balance}>$9,400</Text>
+          <Text style={styles.balance}>${savingsData[selectedTab].reduce((acc, item) => acc + item.amount, 0)}</Text>
         </View>
 
         <View style={styles.incomeExpenseContainer}>
@@ -99,6 +163,7 @@ export default function HomeScreen() {
             amount={item.amount}
             time={item.time}
             onDelete={() => handleDeleteItem(index)}
+            onEdit={() => handleEditItem(index)}
           />
         ))}
       </ScrollView>
@@ -129,6 +194,15 @@ export default function HomeScreen() {
               value={newItem.time}
               onChangeText={(text) => setNewItem({ ...newItem, time: text })}
             />
+
+            <TouchableOpacity style={styles.addImageButton} onPress={handleSelectImage}>
+              <Text style={styles.addImageButtonText}>Select Image</Text>
+            </TouchableOpacity>
+
+            {imageUri && (
+              <Image source={{ uri: imageUri }} style={styles.selectedImage} />
+            )}
+
             <TouchableOpacity style={styles.saveButton} onPress={handleAddItem}>
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
@@ -142,7 +216,7 @@ export default function HomeScreen() {
   );
 }
 
-const SavingsItem = ({ icon, label, amount, time, onDelete }) => (
+const SavingsItem = ({ icon, label, amount, time, onDelete, onEdit }) => (
   <View style={styles.savingsItem}>
     <FontAwesome5 name={icon} size={30} color="black" />
     <View style={styles.savingsDetails}>
@@ -152,6 +226,7 @@ const SavingsItem = ({ icon, label, amount, time, onDelete }) => (
       </View>
     </View>
     <View style={styles.deleteContainer}>
+      <MaterialIcons name="edit" size={24} color="blue" onPress={onEdit} />
       <MaterialIcons name="delete" size={24} color="red" onPress={onDelete} />
       <Text style={styles.timeText}>{time}</Text>
     </View>
@@ -206,49 +281,44 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   incomeCard: {
-    backgroundColor: '#00C853',
-    padding: 25,
+    width: '48%',
+    backgroundColor: '#4CAF50',
+    padding: 15,
     borderRadius: 15,
-    width: width * 0.44,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   expenseCard: {
-    backgroundColor: '#FF3D00',
-    padding: 25,
+    width: '48%',
+    backgroundColor: '#F44336',
+    padding: 15,
     borderRadius: 15,
-    width: width * 0.44,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   cardText: {
-    color: '#FFF',
-    fontWeight: '600',
     fontSize: 18,
+    color: '#fff',
   },
   income: {
-    color: '#FFF',
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
+    color: '#fff',
   },
   expense: {
-    color: '#FFF',
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
+    color: '#fff',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: '#4CAF50',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
   },
   chart: {
     height: 200,
     marginBottom: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFF',
-    padding: 10,
-    elevation: 6,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -257,28 +327,25 @@ const styles = StyleSheet.create({
   },
   tab: {
     fontSize: 16,
-    color: '#666',
+    color: '#888',
   },
   activeTab: {
     fontSize: 16,
-    color: '#4CAF50',
     fontWeight: 'bold',
+    color: '#4CAF50',
   },
   savingsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 20,
   },
   savingsItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
     borderRadius: 10,
-    elevation: 4,
-    marginBottom: 10,
-    justifyContent: 'space-between',
+    marginBottom: 15,
+    elevation: 5,
   },
   savingsDetails: {
     flex: 1,
@@ -286,14 +353,15 @@ const styles = StyleSheet.create({
   },
   savingsLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#333',
   },
   savingsAmountContainer: {
-    marginTop: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   savingsAmount: {
     fontSize: 18,
-    fontWeight: 'bold',
     color: '#4CAF50',
   },
   deleteContainer: {
@@ -302,75 +370,90 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 12,
     color: '#888',
-    marginTop: 5,
-  },
-  deleteButton: {
-    marginLeft: 10,
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 1,
-    left: '50%',
-    transform: [{ translateX: -30 }],
-    width: 60,
-    height: 60,
-    backgroundColor: 'purple',
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  addButtonText: {
-    color: 'white',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContainer: {
-    backgroundColor: '#FFF',
-    padding: 30,
-    borderRadius: 10,
-    width: width * 0.8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 20,
-    fontSize: 16,
   },
   saveButton: {
     backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 10,
+    marginTop: 20,
   },
   saveButtonText: {
-    color: '#FFF',
+    color: '#fff',
     fontSize: 18,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#4CAF50',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 30,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: width - 40,
+    alignItems: 'center',
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    fontSize: 16,
+  },
+  addImageButton: {
+    backgroundColor: '#2196F3',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  addImageButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
   },
   closeButton: {
-    backgroundColor: '#FF3D00',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
+    backgroundColor: '#FF5722',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
   },
   closeButtonText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
+  },
+  seeAll: {
+    fontSize: 16,
+    color: '#2196F3',
   },
 });
+
