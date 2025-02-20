@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ProgressBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import ProgressBar from 'react-native-progress/Bar'; // นำเข้า ProgressBar จาก react-native-progress
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -105,10 +106,11 @@ const BudgetScreen = () => {
           <View key={index} style={styles.budgetItem}>
             <Text style={styles.budgetName}>{budget.name}</Text>
             <ProgressBar
-              styleAttr="Horizontal"
-              indeterminate={false}
               progress={budget.remaining / budget.total}
-              color={budget.color}
+              width={null} // ขยายให้เต็มความกว้างของ container
+              height={8} // ความสูงของ ProgressBar
+              color={budget.color} // กำหนดสีของ ProgressBar
+              unfilledColor="gray" // สีของส่วนที่ยังไม่เต็ม
             />
             <Text style={styles.budgetRemaining}>
               Remaining: ${budget.remaining} / ${budget.total}

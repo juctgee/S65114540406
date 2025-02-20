@@ -29,12 +29,17 @@ export default function SignUpScreen() {
 
   // Handle sign up
   const handleSignUp = async () => {
+    console.log("Sign Up Button Pressed"); // ตรวจสอบว่ากดปุ่มหรือไม่
+
     if (!username || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     try {
+      // ตรวจสอบข้อมูลก่อนส่งไปที่ API
+      console.log('Sending data:', { username, email, password });
+
       const response = await fetch('http://192.168.1.47:8081/api/users/signup', {
         method: 'POST',
         headers: {
@@ -45,14 +50,19 @@ export default function SignUpScreen() {
 
       const data = await response.json();
 
+      // ตรวจสอบว่าได้รับการตอบกลับจาก API
+      console.log('API Response:', data);
+
       if (response.ok) {
         Alert.alert('Success', 'User registered successfully');
+        console.log("Navigating to Login Screen"); // แสดงว่าไปหน้า Login
         navigation.navigate('Login'); // ไปหน้า Login
       } else {
         Alert.alert('Error', data.error || 'Failed to register');
       }
     } catch (err) {
       Alert.alert('Error', `Network request failed: ${err.message}`);
+      console.error('Network error:', err); // แสดงข้อผิดพลาดใน console
     }
   };
 

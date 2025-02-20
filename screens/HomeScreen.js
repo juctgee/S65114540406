@@ -113,7 +113,9 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <FontAwesome5 name="user-circle" size={40} color="#FFC0CB" />
           <Text style={styles.month}>{currentMonth} {currentYear}</Text>
+          <TouchableOpacity onPress={() => alert('Notification Clicked!')}>
           <MaterialIcons name="notifications-none" size={28} color="purple" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.balanceContainer}>

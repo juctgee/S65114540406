@@ -5,7 +5,6 @@ import HomeScreen from './screens/HomeScreen';
 import TransactionsScreen from './screens/TransactionScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import BudgetScreen from './screens/BudgetScreen'; // ✅ ใช้ชื่อไฟล์ที่ถูกต้อง
-import CreateBudgetScreen from './screens/CreateBudgetScreen'; // ✅ เพิ่มไฟล์ CreateBudget
 
 const Tab = createBottomTabNavigator();
 
@@ -29,6 +28,7 @@ export default function MainNavigator() {
       <Tab.Screen name="Transactions" component={TransactionsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Budget" component={BudgetScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
+
     </Tab.Navigator>
   );
 }

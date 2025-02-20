@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import navigation
+import { Ionicons } from '@expo/vector-icons'; // ✅ ใช้อันนี้พอ
+import { useNavigation } from '@react-navigation/native';  // นำเข้าครั้งเดียว
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -9,7 +9,7 @@ const months = [
 ];
 
 const BudgetScreen = () => {
-  const navigation = useNavigation(); // ใช้งาน navigation
+  const navigation = useNavigation();
   const [currentMonthIndex, setCurrentMonthIndex] = useState(new Date().getMonth());
 
   const handlePrevMonth = () => {
@@ -37,7 +37,6 @@ const BudgetScreen = () => {
         <Text style={styles.subText}>Let’s make one so you’re in control.</Text>
       </View>
 
-      {/* ปุ่มกดเพื่อไปหน้าสร้าง Budget */}
       <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateBudgetScreen')}>
         <Text style={styles.buttonText}>Create a budget</Text>
       </TouchableOpacity>
