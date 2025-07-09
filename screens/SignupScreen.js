@@ -40,7 +40,7 @@ export default function SignUpScreen() {
       // ตรวจสอบข้อมูลก่อนส่งไปที่ API
       console.log('Sending data:', { username, email, password });
 
-      const response = await fetch('http://192.168.1.47:8081/api/users/signup', {
+      const response = await fetch('http://192.168.1.48:8082/api/users/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,12 +73,14 @@ export default function SignUpScreen() {
       {/* Background Image */}
       <Image
         style={styles.backgroundImage}
-        source={require('C:/Users/66923/Documents/Project/Money/Money/Money/assets/images/background.png')}
+        source={require('../assets/images/background.png')}
+
       />
 
       {/* Logo */}
       <Logo
-        source={require('C:/Users/66923/Documents/Project/Money/Money/Money/assets/images/lustres.png')}
+        source={require('../assets/images/lustres.png')}
+
         style={styles.logoLarge}
       />
 

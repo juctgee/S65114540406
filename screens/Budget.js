@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import ProgressBar from 'react-native-progress/Bar'; // นำเข้า ProgressBar จาก react-native-progress
+import ProgressBar from 'react-native-progress/Bar';
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -14,89 +14,73 @@ const BudgetScreen = () => {
   const route = useRoute();
   const [currentMonthIndex, setCurrentMonthIndex] = useState(new Date().getMonth());
 
-  // Get the budget details passed from CreateBudgetScreen
-  const newBudget = route.params?.newBudget;
+  // รับข้อมูลงบประมาณที่ส่งมาจากหน้า TransactionsScreen
+  const newTransaction = route.params?.newTransaction;
   const alertMessage = route.params?.alertMessage || '';
 
-  const [budgets, setBudgets] = useState(newBudget ? [newBudget] : [
+  const [budgets, setBudgets] = useState([
     { name: 'Shopping', remaining: 500, total: 400, color: 'orange' },
     { name: 'Transportation', remaining: 350, total: 700, color: 'blue' }
   ]);
-  
+
   const [showAlert, setShowAlert] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const alertOpacity = new Animated.Value(0);
 
-  const transactions = [
-    { category: 'Shopping', amount: 550 },
-    { category: 'Transportation', amount: 800 }
-  ];
+  useEffect(() => {
+    if (newTransaction) {
+      calculateExpenses(newTransaction);
+    }
+  }, [newTransaction]);
 
-  const calculateExpenses = () => {
-    const updatedBudgets = [...budgets];
-    let isOverBudget = false;
+  const calculateExpenses = useCallback((transaction) => {
+    if (!transaction) return;
 
-    transactions.forEach((transaction) => {
-      const budgetIndex = updatedBudgets.findIndex((budget) => budget.name === transaction.category);
-      if (budgetIndex !== -1) {
-        updatedBudgets[budgetIndex].remaining = updatedBudgets[budgetIndex].total - transaction.amount;
-
-        if (updatedBudgets[budgetIndex].remaining < 0) {
-          isOverBudget = true;
-        }
+    const updatedBudgets = budgets.map(budget => {
+      if (budget.name === transaction.category) {
+        const updatedRemaining = Math.max(0, budget.remaining - transaction.amount);
+        return { ...budget, remaining: updatedRemaining };
       }
+      return budget;
     });
 
     setBudgets(updatedBudgets);
 
-    if (isOverBudget) {
-      setShowAlert(true);
-      setStatusMessage('ใช้จ่ายเกินงบประมาณแล้ว!');
-      setTimeout(() => setShowAlert(false), 3000); // Hide alert after 3 seconds
-    } else {
-      setShowAlert(true);
-      setStatusMessage('ใช้จ่ายภายในงบประมาณ');
-      setTimeout(() => setShowAlert(false), 3000); // Hide alert after 3 seconds
-    }
-  };
-
-  const handlePrevMonth = () => {
-    setCurrentMonthIndex(prevIndex => (prevIndex === 0 ? 11 : prevIndex - 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentMonthIndex(prevIndex => (prevIndex === 11 ? 0 : prevIndex + 1));
-  };
-
-  useEffect(() => {
-    calculateExpenses();
-  }, []);
-
-  const handleContinue = () => {
-    navigation.goBack();
-  };
+    // แสดงแจ้งเตือน
+    const isOverBudget = updatedBudgets.some(budget => budget.remaining === 0);
+    setStatusMessage(isOverBudget ? 'ใช้จ่ายเกินงบประมาณแล้ว!' : 'ใช้จ่ายภายในงบประมาณ');
+    setShowAlert(true);
+    
+    Animated.timing(alertOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => {
+      setTimeout(() => {
+        Animated.timing(alertOpacity, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start(() => setShowAlert(false));
+      }, 3000);
+    });
+  }, [budgets]);
 
   return (
     <View style={styles.container}>
       {showAlert && (
-        <View style={[styles.alert, { backgroundColor: statusMessage === 'ใช้จ่ายภายในงบประมาณ' ? 'green' : 'red' }]}>
-          <Ionicons name={statusMessage === 'ใช้จ่ายภายในงบประมาณ' ? 'checkmark' : 'warning'} size={24} color="white" />
+        <Animated.View style={[styles.alert, { opacity: alertOpacity, backgroundColor: statusMessage.includes('เกิน') ? 'red' : 'green' }]}>
+          <Ionicons name={statusMessage.includes('เกิน') ? 'warning' : 'checkmark'} size={24} color="white" />
           <Text style={styles.alertText}>{statusMessage}</Text>
-        </View>
-      )}
-
-      {alertMessage && (
-        <View style={[styles.alert, { backgroundColor: 'red' }]}>
-          <Ionicons name="warning" size={24} color="white" />
-          <Text style={styles.alertText}>{alertMessage}</Text>
-        </View>
+        </Animated.View>
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={handlePrevMonth}>
+        <TouchableOpacity onPress={() => setCurrentMonthIndex((prev) => (prev === 0 ? 11 : prev - 1))}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.monthText}>{months[currentMonthIndex]}</Text>
-        <TouchableOpacity onPress={handleNextMonth}>
+        <TouchableOpacity onPress={() => setCurrentMonthIndex((prev) => (prev === 11 ? 0 : prev + 1))}>
           <Ionicons name="chevron-forward" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -105,21 +89,13 @@ const BudgetScreen = () => {
         {budgets.map((budget, index) => (
           <View key={index} style={styles.budgetItem}>
             <Text style={styles.budgetName}>{budget.name}</Text>
-            <ProgressBar
-              progress={budget.remaining / budget.total}
-              width={null} // ขยายให้เต็มความกว้างของ container
-              height={8} // ความสูงของ ProgressBar
-              color={budget.color} // กำหนดสีของ ProgressBar
-              unfilledColor="gray" // สีของส่วนที่ยังไม่เต็ม
-            />
-            <Text style={styles.budgetRemaining}>
-              Remaining: ${budget.remaining} / ${budget.total}
-            </Text>
+            <ProgressBar progress={budget.remaining / budget.total} width={null} height={8} color={budget.color} unfilledColor="gray" />
+            <Text style={styles.budgetRemaining}>Remaining: ${budget.remaining} / ${budget.total}</Text>
           </View>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+      <TouchableOpacity style={styles.continueButton} onPress={() => navigation.goBack()}>
         <Text style={styles.buttonText}>Go Back</Text>
       </TouchableOpacity>
     </View>

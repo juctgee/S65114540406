@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';  // เปลี่ยน�
 
 const settingsOptions = [
   { label: 'Currency', value: 'USD', options: ['USD', 'EUR', 'GBP'] },
-  { label: 'Language', value: 'English', options: ['English', 'Spanish', 'French'] },
+  { label: 'Language', value: 'English', options: ['English', 'Thai', 'French'] },
   { label: 'Theme', value: 'Light', options: ['Light', 'Dark'] },
   { label: 'Security', value: 'Fingerprint', options: ['Fingerprint', 'Password'] },
   { label: 'Notification', value: 'Enabled', options: ['Enabled', 'Disabled'] },

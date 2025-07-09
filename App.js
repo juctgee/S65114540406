@@ -12,6 +12,10 @@ import Budget from './screens/Budget';
 import BudgetScreen from './screens/BudgetScreen';
 import 'core-js/features/set-immediate';
 import SettingsScreen from './screens/SettingsScreen';
+import 'react-native-polyfill-globals/auto';
+import 'setimmediate';
+
+
 
 const Stack = createStackNavigator();
 

@@ -24,7 +24,7 @@ export default function LoginScreen() {
        // userName: 'User Name',  // คุณสามารถกำหนด userName จาก input หรือข้อมูลที่ต้องการ
        // email: email,
      // });
-    //} else {
+    } else {
       Alert.alert('Error', 'Please enter your email and password');
     }
   };

@@ -36,7 +36,6 @@ export default function HomeScreen() {
   const [editItemIndex, setEditItemIndex] = useState(null);
   const [imageUri, setImageUri] = useState(null);
   
-
   // Get current month and year
   const currentMonth = new Date().toLocaleString('default', { month: 'long' });
   const currentYear = new Date().getFullYear();
@@ -73,6 +72,31 @@ export default function HomeScreen() {
     setShowModal(false);
     setNewItem({ label: '', amount: '', time: '' });
     setImageUri(null);  // Reset image after adding the item
+
+    // Send data to backend after saving
+    const formData = new FormData();
+    formData.append('label', newItem.label);
+    formData.append('amount', newItem.amount);
+    formData.append('time', newItem.time);
+    if (imageUri) {
+      formData.append('image', {
+        uri: imageUri,
+        name: 'image.jpg',
+        type: 'image/jpeg',
+      });
+    }
+
+    fetch('http://192.168.1.5:8083/add-savings', {
+      method: 'POST',
+      body: formData,
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Data sent to backend:', data);
+    })
+    .catch((error) => {
+      console.error('Error sending data:', error);
+    });
   };
 
   const handleDeleteItem = (index) => {
@@ -337,25 +361,32 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
   },
   savingsContainer: {
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  seeAll: {
+    color: '#4CAF50',
+    fontSize: 16,
   },
   savingsItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
     backgroundColor: '#fff',
+    padding: 15,
     borderRadius: 10,
-    marginBottom: 15,
     elevation: 5,
+    marginBottom: 10,
   },
   savingsDetails: {
     flex: 1,
-    marginLeft: 10,
+    paddingLeft: 15,
   },
   savingsLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#333',
   },
   savingsAmountContainer: {
@@ -363,42 +394,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   savingsAmount: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#4CAF50',
   },
   deleteContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   timeText: {
     fontSize: 12,
     color: '#888',
   },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-  },
   addButton: {
     position: 'absolute',
-    bottom: 20,
     right: 20,
+    bottom: 20,
     backgroundColor: '#4CAF50',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    borderRadius: 50,
     elevation: 5,
   },
   addButtonText: {
-    color: '#fff',
     fontSize: 30,
+    color: '#fff',
   },
   modalOverlay: {
     flex: 1,
@@ -407,55 +425,62 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    width: '80%',
     padding: 20,
+    backgroundColor: '#fff',
     borderRadius: 10,
-    width: width - 40,
-    alignItems: 'center',
-    elevation: 10,
+    elevation: 8,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   input: {
-    width: '100%',
-    padding: 10,
-    marginBottom: 10,
+    height: 40,
     borderWidth: 1,
     borderColor: '#ddd',
+    marginBottom: 15,
+    paddingLeft: 10,
     borderRadius: 5,
-    fontSize: 16,
   },
   addImageButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#4CAF50',
     padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: 'center',
   },
   addImageButtonText: {
     color: '#fff',
-    fontSize: 16,
   },
   selectedImage: {
-    width: 100,
-    height: 100,
-    marginTop: 10,
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   closeButton: {
-    backgroundColor: '#FF5722',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
+    backgroundColor: '#F44336',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
-  },
-  seeAll: {
-    fontSize: 16,
-    color: '#2196F3',
   },
 });
 

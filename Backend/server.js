@@ -61,6 +61,6 @@ app.put('/api/users/update', (req, res) => {
 });
 
 // Start Server
-app.listen(8081, () => {
-  console.log('Server is running on port 8081');
+app.listen(8082, () => {
+  console.log('Server is running on port 8082');
 });
