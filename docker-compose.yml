@@ -1,14 +1,16 @@
+version: "3.9"
 
 services:
   backend:
     build: ./Backend
     ports:
-      - "3000:3000"
+      - "10406:8082"   # backend 1XXXX (รหัส 4 ตัวท้าย 0406)
     environment:
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=1234
       - DB_NAME=money_db
+      - DB_PORT=20406   # MySQL port 2XXXX
     depends_on:
       - db
 
@@ -19,9 +21,47 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: money_db
     ports:
-      - "3306:3306"
+      - "20406:3306"   # mysql 2XXXX
     volumes:
       - db_data:/var/lib/mysql
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "10407:80"     # phpmyadmin 1XXXX+1
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: 1234
+      PMA_ARBITRARY: 1
+    depends_on:
+      - db
+
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 261146
+      POSTGRES_DB: Money
+    ports:
+      - "25432:5432"   # postgres 2XXXX
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "10408:80"     # pgAdmin 1XXXX+2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+
 volumes:
   db_data:
+  postgres_data:
