@@ -1,16 +1,14 @@
-version: "3.9"
-
 services:
   backend:
     build: ./Backend
     ports:
-      - "10406:8082"   # backend 1XXXX (รหัส 4 ตัวท้าย 0406)
+      - "${BACKEND_PORT}:8082"
     environment:
       - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=1234
-      - DB_NAME=money_db
-      - DB_PORT=20406   # MySQL port 2XXXX
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_PORT=${MYSQL_PORT}
     depends_on:
       - db
 
@@ -18,10 +16,12 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: money_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "20406:3306"   # mysql 2XXXX
+      - "${MYSQL_PORT}:3306"
     volumes:
       - db_data:/var/lib/mysql
 
@@ -29,12 +29,12 @@ services:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - "10407:80"     # phpmyadmin 1XXXX+1
+      - "${PHPMYADMIN_PORT}:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: 1234
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
       PMA_ARBITRARY: 1
     depends_on:
       - db
@@ -43,11 +43,11 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 261146
-      POSTGRES_DB: Money
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "25432:5432"   # postgres 2XXXX
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -55,10 +55,10 @@ services:
     image: dpage/pgadmin4
     restart: always
     ports:
-      - "10408:80"     # pgAdmin 1XXXX+2
+      - "${PGADMIN_PORT}:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     depends_on:
       - postgres
 
