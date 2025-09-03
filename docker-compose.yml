@@ -26,7 +26,8 @@ services:
       PMA_PASSWORD: 1234
       PMA_ARBITRARY: 1
     depends_on:
-      - mysql
+      mysql:
+        condition: service_started
 
   postgres:
     image: postgres:15
@@ -40,7 +41,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:  # pgAdmin (เปลี่ยนชื่อจาก Postgres กันชนกับ postgres)
+  pgadmin:
     image: dpage/pgadmin4
     restart: always
     ports:
@@ -49,7 +50,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     depends_on:
-      - postgres
+      postgres:
+        condition: service_started
 
   web:
     image: node:20-alpine
@@ -58,20 +60,27 @@ services:
       - ./web:/app
       - /app/node_modules
     ports:
-      - "10406:5173"
+      #- "10406:5173" อันนี้ที่เราสร้างขึ้นมาเอง
+      - "10.80.24.11:10406:5173" # IP เครื่อง
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
-      - mysql
-      - postgres
+      mysql:
+        condition: service_started
+      postgres:
+        condition: service_started
 
   nginx:
     image: nginx:latest
     container_name: my-nginx
     ports:
-      - "80:80"
+     # - "80:80"  อันนี้งานแรก
+      - "10.80.24.11:80:80"  # bind nginx เฉพาะ IP อันนี้คือ ipเครื่องมอ
     volumes:
       - ./html:/usr/share/nginx/html:ro
-
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      web:
+        condition: service_started
 volumes:
   mysql_data:
   postgres_data:
