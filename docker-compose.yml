@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -38,7 +40,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  Postgres:  # pgAdmin
+  pgadmin:  # pgAdmin (เปลี่ยนชื่อจาก Postgres กันชนกับ postgres)
     image: dpage/pgadmin4
     restart: always
     ports:
@@ -61,6 +63,14 @@ services:
     depends_on:
       - mysql
       - postgres
+
+  nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
 
 volumes:
   mysql_data:
